@@ -6,11 +6,16 @@
     <AddTodo
         @add-todo="addTodo"
     />
+    <select v-model="filter">
+      <option value="all">All</option>
+      <option value="completed">Completed</option>
+      <option value="not-completed">Not completed</option>
+    </select>
     <hr>
     <Loader v-if="loading" />
     <TodoList
-        v-else-if="todos.length"
-        v-bind:todosData="todos"
+        v-else-if="filterTodos.length"
+        v-bind:todosData="filterTodos"
         @remove-todo="removeTodo"
     />
     <p v-else>No to-dos!</p>
@@ -28,20 +33,22 @@ export default {
   data() {
     return {
       todos: [],
-      loading: true
+      loading: true,
+      filter: 'all'
     }
   },
 
   // when component added to DOM
   mounted(){
     // fetch data and fill todo array with it
-    fetch('https://jsonplaceholder.typicode.com/todos?_limit=3')
+    fetch('https://jsonplaceholder.typicode.com/todos?_limit=4')
       .then(response => response.json())
       .then(json => {
+          // delay to demonstrate loading animation
           setTimeout(()=> {
             this.todos = json
             this.loading = false
-          }, 2000)
+          }, 1000)
           
           })
   },
@@ -55,6 +62,30 @@ export default {
     addTodo(todo) {
       this.todos.push(todo);
     }
+  },
+
+  computed: {
+    // computed functions used as variables and MUST return variable!
+    filterTodos() {
+      switch (this.filter) {
+        case 'completed':
+          return this.todos.filter(t => t.completed === true)
+          break;
+        case 'not-completed':
+          return this.todos.filter(t => t.completed === false)
+          break;
+        default:
+          return this.todos
+          break;
+      }
+    }
   }
 }
 </script>
+
+<style scoped>
+select {
+  padding: .5rem;
+  margin-top: 1rem;
+}
+</style>
